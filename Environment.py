@@ -125,3 +125,34 @@ class Environment:
             for data in self.playableFrames:
                 self.stream.write(data)
             print('done playing')
+
+class Record:
+    def __init__(self, stream):
+        self.frames = []
+        self.soundLenght=0
+        self.volume=[]
+        self.__recording=False
+        self.__stream=stream
+        for i in range(self.loopLenght):
+            self.volume.append(1)
+        self.playableFrames=self.frames
+
+    def startRecord(self):
+        self.frames=[]
+        self.__recording=True
+        Thread(target=self.__recordingLoop).start()
+
+    def __recordingLoop(self):
+        while self.__recording:
+            self.frames.append(self.__stream.read(CHUNK))
+
+    def stopRecord(self):
+        self.__recording=False
+        return self.frames.copy()
+
+    def playRecord(self):
+        for part in self.frames:
+            self.__stream.write(part)
+                
+			
+		
