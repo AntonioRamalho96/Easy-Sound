@@ -139,8 +139,11 @@ class Record:
 
     def startRecord(self):
         self.frames=[]
+        if self.__recording:
+            return False
         self.__recording=True
         Thread(target=self.__recordingLoop).start()
+        return True
 
     def __recordingLoop(self):
         while self.__recording:
@@ -153,6 +156,9 @@ class Record:
     def playRecord(self):
         for part in self.frames:
             self.__stream.write(part)
+
+    def recordToWav(self, outputFileName):
+        print('not done yet')
                 
 			
 		
