@@ -144,6 +144,14 @@ class EasySound:
             self.__recording=False
             self.__stream=stream
 
+        def recordSpecifiedlenght(self, lenght):
+            self.__frames=[]
+            for i in range(lenght):
+                self.__frames.append(self.__stream.read(CHUNK))
+            self.__recordLenght=lenght
+            return self.__frames.copy()
+
+
         def startRecord(self):
             self.__frames=[]
             if self.__recording:
