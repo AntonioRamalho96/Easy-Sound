@@ -1,5 +1,6 @@
 import struct
 import pyaudio
+import wave
 from threading import Lock
 from threading import Thread
 
@@ -128,18 +129,16 @@ class Environment:
 
 class Record:
     def __init__(self, stream):
-        self.frames = []
-        self.soundLenght=0
-        self.volume=[]
+        self.__frames = [] #audio info
+        self.__recordLenght=0
         self.__recording=False
         self.__stream=stream
-        for i in range(self.loopLenght):
-            self.volume.append(1)
-        self.playableFrames=self.frames
 
     def startRecord(self):
         self.frames=[]
         if self.__recording:
+            print('Cant startRecord when there is a record already in process')
+            print('use stopRecord first')
             return False
         self.__recording=True
         Thread(target=self.__recordingLoop).start()
@@ -151,14 +150,30 @@ class Record:
 
     def stopRecord(self):
         self.__recording=False
+        self.recordLenght=len(self.frames)
         return self.frames.copy()
 
     def playRecord(self):
         for part in self.frames:
             self.__stream.write(part)
 
+    def getFrames(self):
+        return self.__frames.copy()
+
+    def setFrames(self, frames):
+        self.__frames=frames.copy()
+        self.__recordLenght=len(frames)
+
+    def getRecordLenght(self):
+        return self.__recordLenght
+
     def recordToWav(self, outputFileName):
-        print('not done yet')
+        wf = wave.open(outputFileName, 'wb')
+        wf.setnchannels(CHANNELS)
+        wf.setsampwidth(p.get_sample_size(FORMAT))
+        wf.setframerate(RATE)
+        wf.writeframes(b''.join(self.__frames))
+        wf.close()
                 
 			
 		
