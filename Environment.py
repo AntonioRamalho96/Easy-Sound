@@ -11,6 +11,7 @@ RATE = 44100
 p = pyaudio.PyAudio()
 
 class EasySound:
+    #creates a stream from which is possible to read (from microphone) and write (to speakers)
     def openStream(self):
         p=pyaudio.PyAudio()
         return p.open(format=FORMAT,
@@ -191,7 +192,4 @@ class EasySound:
             wf.setsampwidth(p.get_sample_size(FORMAT))
             wf.setframerate(RATE)
             wf.writeframes(b''.join(self.__frames))
-            wf.close()
-                
-			
-		
+            wf.close()      
