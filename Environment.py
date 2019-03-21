@@ -1,6 +1,6 @@
 import struct
 import pyaudio
-import numpy
+import numpy as np
 import wave
 from threading import Lock
 from threading import Thread
@@ -44,6 +44,20 @@ class EasySound:
     def getFormat(self):
         return self.__format
 
+    def listToFrames(self, list):
+        frames=[]
+        for i in list:
+            chunkBit=()
+            for j in range(self.__chunk):
+                chunkBit=chunkBit+(((np.int16)(i)),)
+            frames.append(struct.pack("="+repr(self.__chunk)+"h", *chunkBit))
+        return frames
+
+    def framesToList(self, frames):
+        sampleList=[]
+        for miniChunk in frames:
+            sampleList+list(struct.unpack("="+repr(self.__chunk)+"h", miniChunk))
+        return sampleList
     # Creates an envirolnment. An envirolnment is an object containning Loops
     # in an environment it is possible to play its loops in a syncronized way
     # Future expantions to be done:
@@ -76,6 +90,8 @@ class Environment:
         def closeEnvironment(self):
             self.__close = True
             self.__stream.stop_stream()
+
+        
 
 class Record:
     def __init__(self, stream):
@@ -134,12 +150,3 @@ class Record:
         wf.setframerate(RATE)
         wf.writeframes(b''.join(self.__frames))
         wf.close()
-
-    def getRate(self):
-        return self.__rate
-
-    def getChunk(self):
-        return self.__chunk
-
-    def getFormat(self):
-        return self.__format
