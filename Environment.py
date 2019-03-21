@@ -64,33 +64,6 @@ class EasySound:
     # add sounds at keypresses
     # record loop
 
-class Environment:
-    # the stream is a data stream
-    # reading from stream we obtain the CHUNK samples from the micro
-    # the micro reads RATE samples per second
-    def __init__(self):
-        self.__stream = p.open(format=FORMAT,
-                                   channels=CHANNELS,
-                                   rate=RATE,
-                                   input=True,
-                                   output=True,
-                                   frames_per_buffer=CHUNK)
-        # List of loops in the environment
-        self.allLoops = []
-        self.__close = False
-
-    # Records a loop, finishes recording when user presses ENTER
-    def __recordLoopOnEnter(self):
-        rec = Record(self.__stream)
-        rec.startRecord()
-        input('press ENTER to stop recording...')
-        self.allLoops = Loop(rec.stopRecord())
-        # Close environment
-
-        def closeEnvironment(self):
-            self.__close = True
-            self.__stream.stop_stream()
-
         
 
 class Record:
