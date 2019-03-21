@@ -4,11 +4,6 @@ import struct
 import matplotlib.pyplot as plt
 import copy
 
-print('openning stream...')
-ES=EasySound()
-S=ES.openStream()
-rec=Record(S)
-
 def produceTone(record, freq, Volume, time):
     frames=[]
     plotFrames=()
@@ -21,10 +16,15 @@ def produceTone(record, freq, Volume, time):
         frames.append(struct.pack("=1024h", *thisChunk))
         plotFrames=plotFrames+thisChunk
     record.setFrames(frames)
-    record.playRecord()
+    #record.playRecord()
     return copy.copy(record)
     #plt.plot(plotFrames)
     #plt.show()
+
+print('openning stream...')
+ES=EasySound()
+S=ES.openStream()
+rec=Record(S)
 
 input('Done! Press ENTER to load notes')
 G=produceTone(rec, 392, 5000, 0.5)
