@@ -1,7 +1,7 @@
 import Environment
 from Environment import Record, EasySound
 
-#Init=tialize recording object wih the stream S
+#Initialize recording object wih the stream S
 es=EasySound()
 S=es.openStream()
 rec=Record(S)
