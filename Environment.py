@@ -1,5 +1,6 @@
 import struct
 import pyaudio
+import numpy
 import wave
 from threading import Lock
 from threading import Thread
@@ -12,9 +13,9 @@ p = pyaudio.PyAudio()
 
 
 class EasySound:
+
     # creates a stream from which is possible to read (from microphone) and write (to speakers)
     def openStream(self):
-        p = pyaudio.PyAudio()
         return p.open(format=FORMAT,
                       channels=CHANNELS,
                       rate=RATE,
@@ -22,127 +23,45 @@ class EasySound:
                       output=True,
                       frames_per_buffer=CHUNK)
 
+    # Closes a stream
+    def closeStream(self, stream):
+        stream.stop__stream()
+
+    def timeToChunks(self, time):
+        return (int)(time*RATE/CHUNK)
+
     # Creates an envirolnment. An envirolnment is an object containning Loops
     # in an environment it is possible to play its loops in a syncronized way
     # Future expantions to be done:
     # add sounds at keypresses
     # record loop
-    class Environment:
 
-        # the stream is a data stream
-        # reading from stream we obtain the CHUNK samples from the micro
-        # the micro reads RATE samples per second
-        def __init__(self):
-            self.__stream = p.open(format=FORMAT,
+class Environment:
+    # the stream is a data stream
+    # reading from stream we obtain the CHUNK samples from the micro
+    # the micro reads RATE samples per second
+    def __init__(self):
+        self.__stream = p.open(format=FORMAT,
                                    channels=CHANNELS,
                                    rate=RATE,
                                    input=True,
                                    output=True,
                                    frames_per_buffer=CHUNK)
-            # List of loops in the environment
-            self.allLoops = []
-            self.__close = False
-            self.__launchFlusher()
+        # List of loops in the environment
+        self.allLoops = []
+        self.__close = False
 
-            print('Not defined yet...')
-
-        # See flusher, the flusher is launched running
-
-        def __launchFlusher(self):
-            self.__mutex = Lock()
-            Thread(target=self.__flusherLoop).start()
-        # Start flushing
-
-        def __startStreamContinuousFlush(self):
-            self.__mutex.release()
-        # Stopps flushing
-
-        def __stopStreamContinuousFlush(self):
-            self.__mutex.acquire()
-        # This loop continuosly reads data from the microphone
-        # preventing from a queue of data to be formed in the
-        # stream
-
-        def __flusherLoop(self):
-            while (self.__close == False):
-                print('flushing')
-                self.__mutex.acquire()
-                self.__stream.read(CHUNK)
-                self.__mutex.release()
-
-        # Records a loop, finishes recording when user presses ENTER
-        def recordLoopOnEnter(self):
-            print('press ENTER to finish recording')
-            self.keepRecording = True
-            Thread(self.__waitingThread).start()
-            count = 0
-            frames = []
-            while(self.keepRecording):
-                count = count+1
-                data = self.__stream.read(CHUNK)
-                frames.append(data)
-            print('Time recorded was' + repr(count*1024/44100))
-            return frames
-        # thread waiting for user input to stop recording
-
-        def __waitingThread(self):
-            input()
-            self.keepRecording = False
-
-        # Records a loop, finishes recording when a certain time is lapsed
-        def recordLoopOnTime(self, time):
-            frames = []
-            count = 0
-            self.__stopStreamContinuousFlush()
-            print('recording...')
-            while(count*1024/44100 < time):
-                count = count+1
-                data = self.__stream.read(CHUNK)
-                frames.append(data)
-            self.__startStreamContinuousFlush()
-            print('Time recorded was' + repr(count*1024/44100))
-            return self.Loop(frames, self.__stream)
-
+    # Records a loop, finishes recording when user presses ENTER
+    def __recordLoopOnEnter(self):
+        rec = Record(self.__stream)
+        rec.startRecord()
+        input('press ENTER to stop recording...')
+        self.allLoops = Loop(rec.stopRecord())
         # Close environment
 
-        def closeEverithing(self):
+        def closeEnvironment(self):
             self.__close = True
             self.__stream.stop_stream()
-            p.terminate
-
-        class Loop:
-            def __init__(self, framesList, stream):
-                self.frames = framesList.copy()
-                self.loopLenght = len(self.frames)
-                self.active = False
-                self.volume = []
-                for i in range(self.loopLenght):
-                    self.volume.append(1)
-                self.playableFrames = self.frames
-                self.stream = stream
-
-            def setVolume(self, loopVolume):
-                if len(loopVolume) == self.loopLenght:
-                    self.volume = loopVolume.copy()
-                    self.playableFrames = self.frames.copy()
-                    for miniChunkIndex in range(len(self.playableFrames)):
-                        miniChunkList = struct.unpack(
-                            "=" + repr(CHUNK*2) + "h", self.playableFrames[miniChunkIndex])
-                        for miniChunkFrameIndex in range(len(miniChunkList)):
-                            miniChunkList[miniChunkFrameIndex] = miniChunkList[miniChunkFrameIndex] * \
-                                self.volume[miniChunkIndex]
-                        self.playableFrames[miniChunkIndex] = struct.pack(
-                            "=" + repr(CHUNK*2) + "h", *miniChunkList)
-                else:
-                    print(" in -set volume- argument must have same lenght as loop")
-                    return
-
-            def playLoop(self):
-                print('playing loop')
-                for data in self.playableFrames:
-                    self.stream.write(data)
-                print('done playing')
-
 
 class Record:
     def __init__(self, stream):
@@ -150,7 +69,6 @@ class Record:
         self.__recordLenght = 0
         self.__recording = False
         self.__stream = stream
-
     def startRecord(self):
         self.__frames = []
         if self.__recording:
