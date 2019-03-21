@@ -7,12 +7,17 @@ from threading import Thread
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
-CHANNELS = 2
+CHANNELS = 1
 RATE = 44100
 p = pyaudio.PyAudio()
 
 
 class EasySound:
+
+    def __init__(self):
+        self.__rate=RATE
+        self.__chunk=CHUNK
+        self.__format=FORMAT
 
     # creates a stream from which is possible to read (from microphone) and write (to speakers)
     def openStream(self):
@@ -29,6 +34,15 @@ class EasySound:
 
     def timeToChunks(self, time):
         return (int)(time*RATE/CHUNK)
+
+    def getRate(self):
+        return self.__rate
+
+    def getChunk(self):
+        return self.__chunk
+
+    def getFormat(self):
+        return self.__format
 
     # Creates an envirolnment. An envirolnment is an object containning Loops
     # in an environment it is possible to play its loops in a syncronized way
@@ -69,6 +83,10 @@ class Record:
         self.__recordLenght = 0
         self.__recording = False
         self.__stream = stream
+        self.__rate=RATE
+        self.__chunk=CHUNK
+        self.__format=FORMAT
+
     def startRecord(self):
         self.__frames = []
         if self.__recording:
@@ -116,3 +134,12 @@ class Record:
         wf.setframerate(RATE)
         wf.writeframes(b''.join(self.__frames))
         wf.close()
+
+    def getRate(self):
+        return self.__rate
+
+    def getChunk(self):
+        return self.__chunk
+
+    def getFormat(self):
+        return self.__format
