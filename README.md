@@ -12,19 +12,17 @@ Easy sound is a library built on top of PyAudio to allow a simple use of audio i
 ## How to use it
 In the beginning of your script insert:
 
-import EasySound
+*import EasySound*
 
 EasySound contains some usefull methods to open streams, convert data etc... To open a stream:
 
-stream=EasySound.openStream()
+*stream=EasySound.openStream()*
 
 To create an object of the type record you first need a stream:
 
-rec=EasySound.Record(stream)
+*rec=EasySound.Record(stream)*
 
-Now is easy to do the basics! For mic recording use **record.startRecording()**
-
-**record.stopRecording()**
+Now is easy to do the basics! For mic recording use *record.startRecording()* and *record.stopRecording()* like mentioned above.
 
 It does much more, take a look at the examples to see some functionalities!
 
