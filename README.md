@@ -12,20 +12,42 @@ Easy sound is a library built on top of PyAudio to allow a simple use of audio i
 ## How to use it
 In the beginning of your script insert:
 
-from Environment import EasySound, Record
+import EasySound
 
 EasySound contains some usefull methods to open streams, convert data etc... To open a stream:
 
-ES=EaySound()
-stream=ES.openStream()
+stream=EasySound.openStream()
 
-To create an object of the type record you first need a srream:
+To create an object of the type record you first need a stream:
 
-rec=Record(stream)
+rec=EasySound.Record(stream)
 
-Take a look at the examples to see some functionalities!
+Now is easy to do the basics! For mic recording use **record.startRecording()**
+
+**record.stopRecording()**
+
+It does much more, take a look at the examples to see some functionalities!
 
 ## Methods
+The file EasySound contains several useful methods for playing with audio and the object Record. Before starting lets mention what a **frame list** is. A **frame list** is a list which is playable e.g. sounds in this context are stored as a **frame list** (see technical stuff for more)
+### EasySound methods
+**openStream()** - returns a stream object, allowing to interact with microphone and speakers.
+
+**closeStream(stream)** - closes access to the audio trough the object *stream*
+
+**timeToChunks(time)** - converts a given *time* in seconds to the number of chunks that it represents. (see technical stuff).
+
+**listToFrames(list)** - converts a list of numbers (float or int for example) to a frame list (playable) which is returned
+
+**framesToList(frames))** - oposit process, the result is returned as a list of 16bit integers
 
 ## Some technical stuff...
+### Frame list format
+What is a frame list?? well a frame list is a list of chunks of frames. Each chunk of frames contains EasySound.CHUNK frames as a single byte string. Each frame is represented using 16 bits, therefor each CHUNK has EasySound.CHUNK*16 bits. What is a frame?? It is a raw value of the audio.
+
+Put plot of a chunk
+
+Confused?? Lets make a scheme:
+
+Put scheme
 

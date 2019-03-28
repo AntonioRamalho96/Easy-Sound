@@ -39,6 +39,8 @@ def listToFrames(list):
         chunkBit = ()
         for j in range(CHUNK):
             chunkBit = chunkBit+(((np.int16)(i)),)
+        if(len(chunkBit)<CHUNK):
+            chunkBit=chunkBit+((np.int16)(0),)*(CHUNK-len(chunkBit))
         frames.append(struct.pack("="+repr(CHUNK)+"h", *chunkBit))
     return frames
 
@@ -47,8 +49,7 @@ def framesToList(frames):
     sampleList = []
     i = 0
     for miniChunk in frames:
-        sampleList = sampleList + \
-            list(struct.unpack('='+repr(CHUNK)+'h', miniChunk))
+        sampleList = sampleList + list(struct.unpack('='+repr(CHUNK)+'h', miniChunk))
     return copy.copy(sampleList)
     # Creates an envirolnment. An envirolnment is an object containning Loops
     # in an environment it is possible to play its loops in a syncronized way
@@ -62,6 +63,29 @@ def sumChunks(chunkList):
     for oneChunk in chunkList:
         sumChunk=tuple(map(operator.add, sumChunk, oneChunk))
     return sumChunk
+
+def plotAudio(frames):
+    import matplotlib.pyplot as plt
+    plt.plot(tuple(framesToList(frames)))
+    plt.show()
+
+#returns a record object with frequency -freq- in Hz, volume -Volume- (from 0 to 32000)
+#and -time- seconds of lenght
+def produceTone(stream, freq, Volume, time):
+    frames=[]
+    plotFrames=()
+    count=0
+    for i in range(timeToChunks(time)): #for all the chunks of the record
+        thisChunk=()
+        for j in range(1024): #for each of the samples in each chunk
+            thisChunk=thisChunk+(((np.int16)(Volume*np.cos(freq*np.pi*2/44100*count))),)  #put samples representing a cosine function
+            count=count+1
+        frames.append(struct.pack("=1024h", *thisChunk))
+        plotFrames=plotFrames+thisChunk
+    record=Record(stream)
+    record.setFrames(frames)
+    return copy.copy(record)
+
 
 
 class Record:
