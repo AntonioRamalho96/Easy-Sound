@@ -35,15 +35,17 @@ The file EasySound contains several useful methods for playing with audio and th
 
 **closeStream(stream)** - closes access to the audio trough the object *stream*
 
+**recordToWav(record, outputFileName)** - Creates a *.wav* file with name *outputFileName* (remember to add .wav) from the record object *record*
+
 **plotAudio(frames)** - plots the audio, you'll look like a professional working with audio signals :sunglasses: 
 
 **produceTone(stream, freq, Volume, time)** - returns a record object with frequency *freq* in Hz, volume *Volume* (from 0 to 32000) and *time* seconds of lenght.
 
 **timeToChunks(time)** - converts a given *time* in seconds to the number of chunks that it represents. (see technical stuff).
 
-**listToFrames(list)** - converts a list of numbers (float or int for example) to a frame list (playable) which is returned (NOT TESTED)
+**listToFrames(list)** - converts a list of numbers (float or int for example) to a frame list (playable) which is returned **(NOT TESTED)**
 
-**framesToList(frames))** - oposit process, the result is returned as a list of 16bit integers
+**framesToList(frames)** - oposit process, the result is returned as a list of 16bit integers
 
 
 
