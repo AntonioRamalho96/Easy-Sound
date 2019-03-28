@@ -1,10 +1,8 @@
-import Environment
-from Environment import Record, EasySound
+import EasySound as es
 
 #Initialize recording object wih the stream S
-es=EasySound()
 S=es.openStream()
-rec=Record(S)
+rec=es.Record(S)
 
 input('press ENTER to start recording')
 rec.startRecord()

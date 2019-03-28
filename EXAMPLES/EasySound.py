@@ -1,5 +1,6 @@
 import struct
 import pyaudio
+import operator
 import numpy as np
 import wave
 import copy
@@ -13,65 +14,55 @@ RATE = 44100
 p = pyaudio.PyAudio()
 
 
-class EasySound:
-
-    def __init__(self):
-        self.__rate=RATE
-        self.__chunk=CHUNK
-        self.__format=FORMAT
-
-    # creates a stream from which is possible to read (from microphone) and write (to speakers)
-    def openStream(self):
-        return p.open(format=FORMAT,
-                      channels=CHANNELS,
-                      rate=RATE,
-                      input=True,
-                      output=True,
-                      frames_per_buffer=CHUNK)
+def openStream():
+    return p.open(format=FORMAT,
+                  channels=CHANNELS,
+                  rate=RATE,
+                  input=True,
+                  output=True,
+                  frames_per_buffer=CHUNK)
 
     # Closes a stream
-    def closeStream(self, stream):
-        stream.stop__stream()
 
-    def timeToChunks(self, time):
-        return (int)(time*RATE/CHUNK)
 
-    def getRate(self):
-        return self.__rate
+def closeStream(stream):
+    stream.stop__stream()
 
-    def getChunk(self):
-        return self.__chunk
 
-    def getFormat(self):
-        return self.__format
+def timeToChunks(time):
+    return (int)(time*RATE/CHUNK)
 
-    def listToFrames(self, list):
-        frames=[]
-        for i in list:
-            chunkBit=()
-            for j in range(self.__chunk):
-                chunkBit=chunkBit+(((np.int16)(i)),)
-            frames.append(struct.pack("="+repr(self.__chunk)+"h", *chunkBit))
-        return frames
 
-    def framesToList(self, frames):
-        sampleList=[]
-        i=0
-        for miniChunk in frames:
-            sampleList=sampleList+list(struct.unpack('='+repr(self.__chunk)+'h', miniChunk))
-        return copy.copy(sampleList)
+def listToFrames(list):
+    frames = []
+    for i in list:
+        chunkBit = ()
+        for j in range(CHUNK):
+            chunkBit = chunkBit+(((np.int16)(i)),)
+        frames.append(struct.pack("="+repr(CHUNK)+"h", *chunkBit))
+    return frames
+
+
+def framesToList(frames):
+    sampleList = []
+    i = 0
+    for miniChunk in frames:
+        sampleList = sampleList + \
+            list(struct.unpack('='+repr(CHUNK)+'h', miniChunk))
+    return copy.copy(sampleList)
     # Creates an envirolnment. An envirolnment is an object containning Loops
     # in an environment it is possible to play its loops in a syncronized way
     # Future expantions to be done:
     # add sounds at keypresses
     # record loop
 
-    def sumChunks(self, chunkList):
-        for oneCunk in chunkList:
-            i=2
-        return i
 
-        
+def sumChunks(chunkList):
+    sumChunk=(b'\x00\x00')*CHUNK
+    for oneChunk in chunkList:
+        sumChunk=tuple(map(operator.add, sumChunk, oneChunk))
+    return sumChunk
+
 
 class Record:
     def __init__(self, stream):
@@ -79,9 +70,9 @@ class Record:
         self.__recordLenght = 0
         self.__recording = False
         self.__stream = stream
-        self.__rate=RATE
-        self.__chunk=CHUNK
-        self.__format=FORMAT
+        self.__rate = RATE
+        self.__chunk = CHUNK
+        self.__format = FORMAT
 
     def startRecord(self):
         self.__frames = []

@@ -1,12 +1,10 @@
-import Environment
-from Environment import EasySound, Record
+import EasySound as ES
 from threading import Thread
 import time
 import struct
 
-ES=EasySound()
 S=ES.openStream()
-rec=Record(S)
+rec=ES.Record(S)
 
 rec.startRecord()
 time.sleep(1)

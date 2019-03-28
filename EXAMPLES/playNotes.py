@@ -1,4 +1,4 @@
-from Environment import EasySound, Record
+import EasySound as ES
 import numpy as np
 import struct
 import matplotlib.pyplot as plt
@@ -22,9 +22,8 @@ def produceTone(record, freq, Volume, time):
 
 #creates a Record object
 print('openning stream...')
-ES=EasySound()
 S=ES.openStream()
-rec=Record(S)
+rec=ES.Record(S)
 
 #create Record Objects for each tone
 input('Done! Press ENTER to load notes')
