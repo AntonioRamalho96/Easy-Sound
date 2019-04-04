@@ -1,9 +1,7 @@
-import Environment
-from Environment import EasySound, Record
+import EasySound as ES
 
-ES=EasySound()
 S=ES.openStream()
-rec=Record(S)
+rec=ES.Record(S)
 
 
 rec.prepareRecord() #This allows recording to start instantainiously
