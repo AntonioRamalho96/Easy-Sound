@@ -31,7 +31,7 @@ class EasySound:
 
     # Closes a stream
     def closeStream(self, stream):
-        stream.stop__stream()
+        stream.stop_stream()
 
     def timeToChunks(self, time):
         return (int)(time*RATE/CHUNK)
@@ -77,11 +77,19 @@ class Record:
     def __init__(self, stream):
         self.__frames = []  # audio info
         self.__recordLenght = 0
-        self.__recording = False
+        
         self.__stream = stream
         self.__rate=RATE
         self.__chunk=CHUNK
         self.__format=FORMAT
+        
+        self.__recording = False
+        self.__alive=True
+        self.__prepare=False
+
+    def prepareRecord(self):
+        self.__prepare=True
+        Thread(target=self.__flushing).start()
 
     def startRecord(self):
         self.__frames = []
@@ -90,7 +98,10 @@ class Record:
             print('use stopRecord first')
             return False
         self.__recording = True
-        Thread(target=self.__recordingLoop).start()
+        if(not self.__prepare):
+            self.__prepare=True
+            Thread(target=self.__flushing).start()
+        
         return True
 
     def recordSpecifiedlenght(self, lenght):
@@ -100,13 +111,10 @@ class Record:
         self.__recordLenght = lenght
         return self.__frames.copy()
 
-    def __recordingLoop(self):
-        while self.__recording:
-            self.__frames.append(self.__stream.read(CHUNK))
-
     def stopRecord(self):
         self.__recording = False
         self.recordLenght = len(self.__frames)
+        self.__prepare=False
         return self.__frames.copy()
 
     def playRecord(self):
@@ -130,3 +138,13 @@ class Record:
         wf.setframerate(RATE)
         wf.writeframes(b''.join(self.__frames))
         wf.close()
+
+    def __flushing(self):
+        while(self.__alive and self.__prepare):
+            if(self.__recording):
+                self.__frames.append(self.__stream.read(self.__chunk))
+            else:
+                self.__stream.read(self.__chunk)
+
+    def close(self):
+        self.__alive=False
