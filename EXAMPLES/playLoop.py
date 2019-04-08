@@ -11,4 +11,5 @@ input('Press ENTER to stop recording')
 rec.stopRecord()
 
 times=int(input("how many times should I loop?"))
+#Plays the record times times in a rows
 rec.playLoop(times)
