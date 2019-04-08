@@ -164,6 +164,42 @@ class Record:
         self.__recordLenght = lenght
         return True
 
+    #Records a specific lenght
+    def recordOnTop(self, lenght, frames):
+        self.__frames = []
+        if self.__recording:
+            print('Cant startRecord when there is a record already in process')
+            print('use stopRecord first')
+            return False
+        self.__prepare=False
+        for i in range(lenght+1):
+            self.__stream.write(frames[i])
+            self.__frames.append(self.__sumTwoChumks(self.__stream.read(CHUNK), frames[i]))
+        self.__recordLenght = lenght
+        return True
+
+    #Records a specific lenght
+    def recordOnListenning(self, lenght, frames):
+        self.__frames = []
+        if self.__recording:
+            print('Cant startRecord when there is a record already in process')
+            print('use stopRecord first')
+            return False
+        self.__prepare=False
+        for i in range(lenght):
+            self.__stream.write(frames[i])
+            self.__frames.append(self.__stream.read(CHUNK))
+        self.__recordLenght = lenght
+        return True
+
+    def __sumTwoChumks(self, chunk1, chunk2):
+        tuple1=tuple(struct.unpack('='+repr(CHUNK)+'h', chunk1))
+        tuple2=tuple(struct.unpack('='+repr(CHUNK)+'h', chunk2))
+        tuple3=()
+        for i in range(CHUNK):
+            tuple3=tuple3+(((np.int16)(tuple1[i]+tuple2[i])),)
+        return struct.pack("="+repr(CHUNK)+"h", *tuple3)
+
     #Stops recording
     def stopRecord(self):
         self.__recording = False

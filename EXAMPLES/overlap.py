@@ -2,22 +2,29 @@ import EasySound as ES
 
 #Initialize recording object wih the stream S
 S=ES.openStream()
-rec=ES.Record(S)
+met=ES.Record(S)
 
-rec.prepareRecord()
-input('press ENTER to start recording')
-rec.startRecord()
+met.prepareRecord()
+input('press ENTER to start recording metronome')
+met.startRecord()
 input('press ENTER to end recording')
-rec.stopRecord()
-print(rec.getRecordLenght())
+met.stopRecord()
+met.setFrames(met.getFrames()*10)
+
+
+rec = ES.Record(S)
+rec.prepareRecord()
+input('press ENTER to start recording channel 1')
+rec.recordOnListenning(met.getRecordLenght(), met.getFrames())
+
 rec2 = ES.Record(S)
 rec2.prepareRecord()
-input('press ENTER to start recording')
+input('press ENTER to start recording channel 2')
+rec2.recordOnListenning(met.getRecordLenght(), met.getFrames())
 
-print('recording, wait...')
-rec2.recordSpecifiedlenght(rec.getRecordLenght())
-print(len(rec.getFrames()))
-print(len(rec2.getFrames()))
+
+#sets rec frames as the sum of both frames
+print('Merging the channels...')
 rec.setFrames(ES.sumFrames(rec.getFrames(), rec2.getFrames()))
-print('press ENTER to play')
+input('press ENTER to play')
 rec.playRecord()
