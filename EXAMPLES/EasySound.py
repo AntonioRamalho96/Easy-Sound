@@ -57,8 +57,27 @@ def framesToList(frames):
 def sumChunks(chunkList):
     sumChunk = (b'\x00\x00')*CHUNK
     for oneChunk in chunkList:
-        sumChunk = tuple(map(operator.add, sumChunk, oneChunk))
+        sumChunk = __sumTwoChumks(sumChunk, oneChunk)
     return sumChunk
+
+def __sumTwoChumks(chunk1, chunk2):
+    tuple1=tuple(struct.unpack('='+repr(CHUNK)+'h', chunk1))
+    tuple2=tuple(struct.unpack('='+repr(CHUNK)+'h', chunk2))
+    tuple3=()
+    for i in range(CHUNK):
+        tuple3=tuple3+(((np.int16)(tuple1[i]+tuple2[i])),)
+    return struct.pack("="+repr(CHUNK)+"h", *tuple3)
+
+def sumFrames(frames1, frames2):
+    frames3=[]
+    if(len(frames1) < len(frames2)):
+        print("Length of first argument should be at least the length of 2nd")
+    else:
+        for i in range(len(frames2)):
+            chunkList=[frames1[i], frames2[i]]
+            frames3.append(sumChunks(chunkList))
+    return frames3
+
 
 #plots the audio in a frames object
 def plotAudio(frames):
@@ -140,7 +159,7 @@ class Record:
             print('use stopRecord first')
             return False
         self.__prepare=False
-        for i in range(lenght):
+        for i in range(lenght+1):
             self.__frames.append(self.__stream.read(CHUNK))
         self.__recordLenght = lenght
         return True
@@ -148,7 +167,7 @@ class Record:
     #Stops recording
     def stopRecord(self):
         self.__recording = False
-        self.recordLenght = len(self.__frames)
+        self.__recordLenght = len(self.__frames)
         self.__prepare=False
         return self.__frames.copy()
 
