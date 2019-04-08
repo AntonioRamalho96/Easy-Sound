@@ -13,7 +13,7 @@ CHANNELS = 1
 RATE = 44100
 p = pyaudio.PyAudio()
 
-
+#Returns a stream object
 def openStream():
     return p.open(format=FORMAT,
                   channels=CHANNELS,
@@ -24,15 +24,15 @@ def openStream():
 
     # Closes a stream
 
-
+#closes stream
 def closeStream(stream):
     stream.stop__stream()
 
-
+#converts time in seconds to chunks (groups of CHUNK frames)
 def timeToChunks(time):
     return (int)(time*RATE/CHUNK)
 
-
+#converts a list of integers to a playable list
 def listToFrames(list):
     frames = []
     for i in list:
@@ -44,7 +44,7 @@ def listToFrames(list):
         frames.append(struct.pack("="+repr(CHUNK)+"h", *chunkBit))
     return frames
 
-
+#converts a playable list to a list of integers
 def framesToList(frames):
     sampleList = []
     i = 0
@@ -52,29 +52,27 @@ def framesToList(frames):
         sampleList = sampleList + \
             list(struct.unpack('='+repr(CHUNK)+'h', miniChunk))
     return copy.copy(sampleList)
-    # Creates an envirolnment. An envirolnment is an object containning Loops
-    # in an environment it is possible to play its loops in a syncronized way
-    # Future expantions to be done:
-    # add sounds at keypresses
-    # record loop
 
-
+#Sums a list of chunks
 def sumChunks(chunkList):
     sumChunk = (b'\x00\x00')*CHUNK
     for oneChunk in chunkList:
         sumChunk = tuple(map(operator.add, sumChunk, oneChunk))
     return sumChunk
 
-
+#plots the audio in a frames object
 def plotAudio(frames):
-    import matplotlib.pyplot as plt
+    try:
+        import matplotlib.pyplot as plt
+    except:
+        print("Couldn't import matplotlib.plot")
+        return False
     plt.plot(tuple(framesToList(frames)))
     plt.show()
+    return True
 
 # returns a record object with frequency -freq- in Hz, volume -Volume- (from 0 to 32000)
 # and -time- seconds of lenght
-
-
 def produceTone(stream, freq, Volume, time):
     frames = []
     plotFrames = ()
@@ -92,7 +90,7 @@ def produceTone(stream, freq, Volume, time):
     record.setFrames(frames)
     return copy.copy(record)
 
-
+#Creates a .wav file from a record object
 def recordToWav(record, outputFileName):
     wf = wave.open(outputFileName, 'wb')
     wf.setnchannels(CHANNELS)
@@ -101,6 +99,7 @@ def recordToWav(record, outputFileName):
     wf.writeframes(b''.join(record.getFrames()))
     wf.close()
 
+#Record object
 class Record:
     def __init__(self, stream):
         self.__frames = []  # audio info
@@ -115,10 +114,12 @@ class Record:
         self.__alive=True
         self.__prepare=False
 
+    #Prepares for recording
     def prepareRecord(self):
         self.__prepare=True
         Thread(target=self.__flushing).start()
 
+    #Starts recording (unblocking)
     def startRecord(self):
         self.__frames = []
         if self.__recording:
@@ -129,38 +130,49 @@ class Record:
         if(not self.__prepare):
             self.__prepare=True
             Thread(target=self.__flushing).start()
-        
         return True
 
+    #Records a specific lenght
     def recordSpecifiedlenght(self, lenght):
         self.__frames = []
+        if self.__recording:
+            print('Cant startRecord when there is a record already in process')
+            print('use stopRecord first')
+            return False
+        self.__prepare=False
         for i in range(lenght):
             self.__frames.append(self.__stream.read(CHUNK))
         self.__recordLenght = lenght
-        return self.__frames.copy()
+        return True
 
+    #Stops recording
     def stopRecord(self):
         self.__recording = False
         self.recordLenght = len(self.__frames)
         self.__prepare=False
         return self.__frames.copy()
 
+    #Plays a record (blocking)
     def playRecord(self):
         for part in self.__frames:
             self.__stream.write(part)
 
+    #Plays a loop times times
     def playLoop(self, times):
         playFrames=self.__frames*times
         for part in playFrames:
             self.__stream.write(part)
 
+    #returns the audio info
     def getFrames(self):
         return self.__frames.copy()
 
+    #sets the audio info
     def setFrames(self, frames):
         self.__frames = frames.copy()
         self.__recordLenght = len(frames)
 
+    #Returns record lenght in chunks (groups of CHUNK frames)
     def getRecordLenght(self):
         return self.__recordLenght
 
@@ -172,6 +184,7 @@ class Record:
         wf.writeframes(b''.join(self.__frames))
         wf.close()
 
+    #Colntinuously discards/records the information in the mic 
     def __flushing(self):
         while(self.__alive and self.__prepare):
             if(self.__recording):
@@ -179,5 +192,6 @@ class Record:
             else:
                 self.__stream.read(self.__chunk)
 
+    #closes a record, important when recording is 'prepared'
     def close(self):
         self.__alive=False
