@@ -142,6 +142,11 @@ class Record:
         for part in self.__frames:
             self.__stream.write(part)
 
+    def playLoop(self, times):
+        playFrames=self.__frames*times
+        for part in playFrames:
+            self.__stream.write(part)
+
     def getFrames(self):
         return self.__frames.copy()
 

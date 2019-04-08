@@ -13,6 +13,8 @@ CHANNELS = 1
 RATE = 44100
 p = pyaudio.PyAudio()
 
+# returns a stream object
+
 
 def openStream():
     return p.open(format=FORMAT,
@@ -22,15 +24,23 @@ def openStream():
                   output=True,
                   frames_per_buffer=CHUNK)
 
-    # Closes a stream
+# closes a stream
 
 
 def closeStream(stream):
     stream.stop__stream()
 
+# converts time (in seconds) to chunks (groups of CHUNK frames)
+
 
 def timeToChunks(time):
     return (int)(time*RATE/CHUNK)
+
+
+def chunksToTime(chunks):
+    return chunks*1.0*CHUNK/RATE
+
+# Converts a list to a format playable
 
 
 def listToFrames(list):
@@ -45,6 +55,7 @@ def listToFrames(list):
     return frames
 
 
+# Converts a playable list to a integer list
 def framesToList(frames):
     sampleList = []
     i = 0
@@ -52,11 +63,8 @@ def framesToList(frames):
         sampleList = sampleList + \
             list(struct.unpack('='+repr(CHUNK)+'h', miniChunk))
     return copy.copy(sampleList)
-    # Creates an envirolnment. An envirolnment is an object containning Loops
-    # in an environment it is possible to play its loops in a syncronized way
-    # Future expantions to be done:
-    # add sounds at keypresses
-    # record loop
+
+# sum chunks in a list of chunks
 
 
 def sumChunks(chunkList):
@@ -65,16 +73,21 @@ def sumChunks(chunkList):
         sumChunk = tuple(map(operator.add, sumChunk, oneChunk))
     return sumChunk
 
+# Plots the sound in a playable object
+
 
 def plotAudio(frames):
-    import matplotlib.pyplot as plt
+    try:
+        import matplotlib.pyplot as plt
+    except:
+        print('Something went erong while importing -matplot.pyplot-')
+        return False
     plt.plot(tuple(framesToList(frames)))
     plt.show()
+    return True
 
 # returns a record object with frequency -freq- in Hz, volume -Volume- (from 0 to 32000)
 # and -time- seconds of lenght
-
-
 def produceTone(stream, freq, Volume, time):
     frames = []
     plotFrames = ()
@@ -92,7 +105,7 @@ def produceTone(stream, freq, Volume, time):
     record.setFrames(frames)
     return copy.copy(record)
 
-
+# creates a wav file from a record object in the directory of the script that calls this function
 def recordToWav(record, outputFileName):
     wf = wave.open(outputFileName, 'wb')
     wf.setnchannels(CHANNELS)
