@@ -50,10 +50,3 @@ The file EasySound contains several useful methods for playing with audio and th
 ## Some technical stuff...
 ### Frame list format
 What is a frame list?? well a frame list is a list of chunks of frames. Each chunk of frames contains EasySound.CHUNK frames as a single byte string. Each frame is represented using 16 bits, therefor each CHUNK has EasySound.CHUNK*16 bits. What is a frame?? It is a raw value of the audio.
-
-Put plot of a chunk
-
-Confused?? Lets make a scheme:
-
-Put scheme
-
